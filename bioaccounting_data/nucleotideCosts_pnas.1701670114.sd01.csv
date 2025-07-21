@@ -1,0 +1,9 @@
+﻿molecule,nucleotides,symbol,opportunity,direct
+DNA,dATP,A,31,13
+DNA,dGTP,G,29,15
+DNA,dCTP,C,37,11
+DNA,dTTP,T,39,12.5
+RNA,ATP,A,29,13
+RNA,GTP,G,27,15
+RNA,CTP,C,35,11
+RNA,UTP,U,35,9
