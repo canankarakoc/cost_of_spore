@@ -2,7 +2,7 @@
 # 21 July 2025 - last update
 # Author: C. Karakoc
 # Global expression data from SporeWeb: https://sporeweb.molgenrug.nl/
-# Newly syntesized proteins during germination: doi: https://10.1128/mSphere.00463-20
+# Newly synthesized proteins during germination: doi: https://10.1128/mSphere.00463-20
 # Global protein abundance data: https://pax-db.org/
 # List of gene categories & annotation: https://subtiwiki.uni-goettingen.de/
 # Protein sequence: Uniprot https://www.uniprot.org/taxonomy/224308
@@ -77,7 +77,7 @@ setwd("~/Documents/GitHub/cost_of_spore")
 # Data
 ######################
 ##########################################################################
-# Gene&protein length from SubtiWiki
+# Gene & protein length from SubtiWiki
 annotationData <- read.table("./bioaccounting/data/subtiwiki.gene.export.2022-05-11.csv", sep = ",", dec = "." , header = T, stringsAsFactors = F, na.strings=c(" ","NA"))
 
 # Data with synonyms # different sources
@@ -213,7 +213,7 @@ protSeqTidyAbun <-  protSeqTidy %>%
 # Merge with expression data
 # Here I'll create two different data sets. One for calculating transcription
 # costs, another for translation. Since proteins are degraded much slower, I
-# I will account for only repolimerization costs of transcripts 
+# I will account for only repolymerization costs of transcripts 
 # Here genes are accounted once base on first appearance
 
 mergedExpData_time_distinct <- expressionLong %>%
@@ -236,7 +236,7 @@ mergedExpData_time <- expressionLong %>%
 ##########################################################################
 # Genome size = (https://www.nature.com/articles/36786)
 
-# DNA unwinding 1ATP per base pair #https://doi.org/10.1016/j.cell.2006.10.049
+# DNA unwinding 1 ATP per base pair #https://doi.org/10.1016/j.cell.2006.10.049
 # ligation of Okazaki fragments 0.3ATP #Lynch and Marinov, 2015
 # included 
 
