@@ -71,7 +71,8 @@ mytheme2 <- theme_bw()+
 # Color blind palette
 cbpalette <- c("#0072B2", "#D55E00","#009E73", "#CC79A7", "#56B4E9", "#999999", "#F0E442", "#000000")
 
-setwd("~/Documents/GitHub/cost_of_spore")
+#setwd("~/Documents/GitHub/cost_of_spore")
+setwd("~/GitHub/cost_of_spore")
 
 ######################
 # Data
@@ -168,16 +169,20 @@ mergedAbunData <- protAbun  %>%
 
 # Fill NAs with median values
 
-# Average protein abundance length
+# Median protein abundance
+# Manuscript line: 1,045
 protMed <- as.numeric(as.vector(protAbun$abundance))
-median(protMed, na.rm = T) #17.6 #round
+median.protMed <- median(protMed, na.rm = T) #17.6 #round
+median.protMed
 
 mergedAbunData$protein_length <- as.numeric(mergedAbunData$protein_length)
 mergedAbunData$gene_length    <- as.numeric(mergedAbunData$gene_length)
 
 # Median protein and gene length 
-median(mergedAbunData$protein_length, na.rm = T) #254
-median(mergedAbunData$gene_length, na.rm = T) #765
+median.protein_length <- median(mergedAbunData$protein_length, na.rm = T) #254
+median.gene_length <- median(mergedAbunData$gene_length, na.rm = T) #765
+median.protein_length
+median.gene_length
 
 # This function takes a while to run 
 protSeqTidy <- protSeq %>%
@@ -219,15 +224,15 @@ protSeqTidyAbun <-  protSeqTidy %>%
 mergedExpData_time_distinct <- expressionLong %>%
   distinct(locus_tag, .keep_all = TRUE) %>% # genes are accounted only once
   left_join(protSeqTidyAbun, by = "locus_tag") %>%
-  mutate(abundance.filled = replace_na(abundance, 18)) %>%
-  mutate(gene_length.filled = replace_na(gene_length, 765)) %>%
-  mutate(protein_length.filled = replace_na(protein_length, 254))
+  mutate(abundance.filled = replace_na(abundance, median.protMed)) %>%
+  mutate(gene_length.filled = replace_na(gene_length, median.gene_length)) %>%
+  mutate(protein_length.filled = replace_na(protein_length, median.protein_length))
 
 mergedExpData_time <- expressionLong %>%
   left_join(protSeqTidyAbun, by = "locus_tag") %>%
-  mutate(abundance.filled = replace_na(abundance, 18)) %>%
-  mutate(gene_length.filled = replace_na(gene_length, 765)) %>%
-  mutate(protein_length.filled = replace_na(protein_length, 254))
+  mutate(abundance.filled = replace_na(abundance, median.protMed)) %>%
+  mutate(gene_length.filled = replace_na(gene_length, median.gene_length)) %>%
+  mutate(protein_length.filled = replace_na(protein_length, median.protein_length))
 
 # Replication costs (Whole genome) 
 #####################
@@ -242,10 +247,13 @@ mergedExpData_time <- expressionLong %>%
 
 # Opportunity 
 # 2 * Genome size * (34+1)
-genome_opp <- 2 * 4214810 * 35 #295036700
+# Eq. 6
+genome.size <- 4214810
+genome_opp <- 2 * genome.size * 35 #295036700
 # Direct 
 # 2 * Genome size * (11+2)
-genome_dir <-( 2 * 4214810 * 14 ) # 118014680
+# Eq. 5
+genome_dir <-( 2 * genome.size * 14 ) # 118014680
 # Total
 genome_tot <- genome_opp + genome_dir #413051380
 
@@ -270,6 +278,7 @@ b  <- 1*1000 # also septum
 c  <- 0.4 
 
 # Outer # 4πa*b
+# Eq. 11
 outer <- 4*pi*a*b 
 moleculesOut <- outer/a1 
 # Inner membrane 4π(a − h)(b - h)
@@ -281,8 +290,10 @@ totalMol <- (moleculesOut + moleculesInn)/2 # total lipid molecules
 # Cost of lipid head & tail 
 # Opportunity = 212, Direct = 18
 # costs
-membraneOpp <- totalMol*212 
-membraneDir <- totalMol*18 
+lipid.opp <- 212
+lidid.dir <- 18
+membraneOpp <- totalMol*lipid.opp 
+membraneDir <- totalMol*lidid.dir 
 membraneTot <- membraneOpp + membraneDir
 
 # Septum should be 1µm 1000 nm (as the width of the cell) 
@@ -291,8 +302,8 @@ septumInn <- ((4*(b-h))/a1)/2
 septumTot <- septumOut + septumInn
 
 # costs
-septumOpp     <- septumTot*212 
-septumDir     <- septumTot*18 
+septumOpp     <- septumTot*lipid.opp 
+septumDir     <- septumTot*lidid.dir 
 
 # Germination assuming that they recycle membrane of the endospore
 # Whole membrane - (endospore sphere + septum)
@@ -330,7 +341,7 @@ sporeRepTotal <- sporeRepSum$sumOpp+sporeRepSum$sumDir
 # total 70842044
 
 # percentage compared to total genome
-sporeRepTotal/413051380  #17%
+sporeRepTotal/genome_tot  #17%
 
 # Transcription costs
 #####################
@@ -342,8 +353,9 @@ sporeRepTotal/413051380  #17%
 # I will count opportunity costs separately, so I can consider repolimerization costs
 
 # Opportunity costs 
+avg.protein.molecules <- 1774445
 sporeTranscriptOpp <- mergedExpData_time_distinct %>%
-  mutate(estimation = (((abundance.filled/1e2)*1774445)/1e6)*gene_length.filled) %>% #protein abundance/1000 X 1.8 X gene length
+  mutate(estimation = (((abundance.filled/1e2)*avg.protein.molecules)/1e6)*gene_length.filled) %>% #protein abundance/1000 X 1.8 X gene length
   # the reason I multiply with 1.8 is that the protein abundance is reported as parts per million. An average size bacteria has about 3 million protein molecules
   # this was reported experimentally as average 1774445 in Bacillus (Maass et.al. 2011)
   mutate(opportunity = estimation*31) 
@@ -360,7 +372,7 @@ sporeTranscriptOppSum2 <- sporeTranscriptOpp %>%
   
 # Direct costs 
 sporeTranscriptDir <- mergedExpData_time %>%
-  mutate(estimation = (((abundance.filled/1e2)*1774445)/1e6)*gene_length.filled) %>% 
+  mutate(estimation = (((abundance.filled/1e2)*avg.protein.molecules)/1e6)*gene_length.filled) %>% 
   mutate(direct = estimation*(10+(2*12*1)))#hours
   # average sporulation time is 8hours, median mRNA degradation rate of Bacillus is 12 per hour 
   # (DOI: 10.1007/s00438-003-0883-6)
@@ -395,14 +407,14 @@ sporeTranscriptDirDist <- sporeTranscriptDir %>%
 #####################
 
 # Fill missing protein sequence cost estimations
-median(mergedExpData_time_distinct$aa_opportunitySum, na.rm = T) #5723
-median(mergedExpData_time_distinct$aa_directSum, na.rm = T) #1351
+median.aa_opportunitySum <- median(mergedExpData_time_distinct$aa_opportunitySum, na.rm = T) #5723
+median.aa_directSum <- median(mergedExpData_time_distinct$aa_directSum, na.rm = T) #1351
 
 # Opportunity and direct costs 
 sporeTranslationOppDir <- mergedExpData_time_distinct %>%
-  mutate(estimation = (abundance.filled*1774445)/1e6) %>% 
-  mutate(aa_opportunitySum.filled = replace_na(aa_opportunitySum, 5723)) %>%
-  mutate(aa_directSum.filled = replace_na(aa_directSum, 1351)) %>%
+  mutate(estimation = (abundance.filled*avg.protein.molecules)/1e6) %>% 
+  mutate(aa_opportunitySum.filled = replace_na(aa_opportunitySum, median.aa_opportunitySum)) %>%
+  mutate(aa_directSum.filled = replace_na(aa_directSum, median.aa_directSum)) %>%
   mutate(direct = estimation*aa_directSum.filled) %>% # ignoring protein degradation
   mutate(opportunity = estimation*aa_opportunitySum.filled) %>% 
   mutate(total = direct + opportunity)
@@ -614,7 +626,7 @@ germRepTotal/genome_tot
 ### Transcription costs ###
 # Opportunity costs 
 germination6opp_interval   <- germLong6_merged_interval %>%
-  mutate(estimation  = (score.filled/1e2)*(1774445)/1e6) %>% 
+  mutate(estimation  = (score.filled/1e2)*(avg.protein.molecules)/1e6) %>% 
   mutate(opportunity = estimation*31) %>%
   group_by(time_interval) %>% 
   summarise(value  = sum(opportunity, na.rm = T))%>%
@@ -623,7 +635,7 @@ germination6opp_interval   <- germLong6_merged_interval %>%
 
 # Direct costs 
 germination6dir_interval    <- germLong6_merged_interval  %>%
-  mutate(estimation  = (score.filled/1e2)*(1774445/1e6)*gene_length.filled) %>% 
+  mutate(estimation  = (score.filled/1e2)*(avg.protein.molecules/1e6)*gene_length.filled) %>% 
   mutate(direct      = estimation*(10+(2*12*time_h)))%>%
   group_by(time_interval) %>% 
   summarise(value  = sum(direct, na.rm = T)) %>%
@@ -636,7 +648,7 @@ totalGermtranscript <- sum(germination6opp_interval$value)+sum(germination6dir_i
 
 # Opportunity and direct costs 
 germination6translation_interval <- germLong6_merged_interval  %>%
-  mutate(estimation = ((score.filled)*(1774445))/1e6) %>% 
+  mutate(estimation = ((score.filled)*(avg.protein.molecules))/1e6) %>% 
   mutate(direct = estimation*aa_directSum.filled) %>% # 
   mutate(opportunity = estimation*aa_opportunitySum.filled) %>% 
   mutate(total = direct + opportunity)%>% 
@@ -811,13 +823,13 @@ mergedTraitData <- otherTraits %>%
 
 # All costs
 totalCosts_traits <- mergedTraitData %>%
-  mutate(translationAll = abundance.filled*(1774445/1e6)) %>%
+  mutate(translationAll = abundance.filled*(avg.protein.molecules/1e6)) %>%
   mutate(aa_opportunitySum.filled = median(aa_opportunitySum, na.rm = T)) %>%
   mutate(aa_directSum.filled = median(aa_directSum, na.rm = T)) %>%
   mutate(translationDirect = translationAll*aa_directSum.filled) %>% # ignoring protein degradation
   mutate(translationOpportunity = translationAll*aa_opportunitySum.filled) %>%
   mutate(translationTotal = translationDirect + translationOpportunity) %>%
-  mutate(transcriptionAll = (abundance.filled/1e2)*(1774445/1e6)*as.numeric(gene_length)) %>%
+  mutate(transcriptionAll = (abundance.filled/1e2)*(avg.protein.molecules/1e6)*as.numeric(gene_length)) %>%
   mutate(transcriptionDirect = transcriptionAll*(10+(2*12*1))) %>% #assuming that mRNAs transcribed at least 1 hour
   mutate(transcriptionOpportunity = transcriptionAll*31) %>%
   mutate(transcriptionTotal = transcriptionDirect + transcriptionOpportunity) %>%
