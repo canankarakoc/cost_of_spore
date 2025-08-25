@@ -257,7 +257,7 @@ protSeqMapped <- prot_map %>%
   left_join(annotation_clean %>% select(locus_tag, gene, protein_length, gene_length),
             by = "locus_tag") %>%
   mutate(
-    protein_length = coalesce(protein_length, prot_len_med),
+    protein_length = coalesce(protein_length, nchar(sequence), prot_len_med),
     gene_length    = coalesce(gene_length,    gene_len_med)
   )
 
@@ -871,7 +871,7 @@ lab_R2     <- paste0("R^2 = ", round(R2, 3))
 
 my_lab <- c(expression(P['D']), expression(P['O']), expression(P['T']))
 
-f1 <- ggplot(NULL, aes(x = x, y = y)) +
+f1 <- ggplot() +
   geom_vline(xintercept = 2, linetype = "dashed") +
   geom_bar(data = sporulationCosts_lay1,
                     aes(x = time, y = sum),
@@ -897,7 +897,7 @@ f1 <- ggplot(NULL, aes(x = x, y = y)) +
                     hjust = "right", size = 6, fontface = 'italic', parse = TRUE) +
   theme(legend.position = c(0.32, 0.83), legend.title = element_blank()) +
   scale_fill_manual(values = c("#D55E00", "#0072B2"),
-                             labels = c(my_lab[1], my_lab[2], my_lab[3]))
+                    labels = c(expression(P[D]), expression(P[O])))
 
 # ggsave("bioaccounting/figures/figure1_sporeCostsTime.pdf", f1, height = 5, width = 6)
 
@@ -1592,11 +1592,13 @@ cat(sprintf("Revival composition: TX %.1f%% | TL %.1f%% | Membrane %.1f%%\n",
 # yield <- 100  # proteins per mRNA lifetime
 
 # Medians for safe fills 
-prot_len_med <- median(annotation_clean$protein_length, na.rm = TRUE)
-gene_len_med <-median(annotation_clean$gene_length,    na.rm = TRUE)
+# prot_len_med 
+# gene_len_med
 
 #  Map trait genes → locus_tag via SubtiWiki symbols (primary), then join protein table
 #  Exclude developmental program categories to avoid double-counting with time-series blocks
+trait_floor_copies <- 0  # set to >0 to increase floor
+
 traits_base <- otherTraits %>%
   filter(!category %in% c("sporulation", "germination", "outgrowth")) %>%
   mutate(gene_std = std(gene)) %>%
@@ -1613,7 +1615,7 @@ traits_base <- otherTraits %>%
   mutate(
     gene_length      = coalesce(gene_length,  gene_len_med),
     protein_length   = coalesce(protein_length, prot_len_med),
-    proteins_per_cell = coalesce(proteins_per_cell, 0)  # no imputation here; 0 if unseen
+    proteins_per_cell = coalesce(proteins_per_cell, trait_floor_copies)  # no imputation here; 0 if unseen
   ) %>%
   select(category, gene = gene, locus_tag, proteins_per_cell,
                 gene_length, protein_length, aa_directSum, aa_opportunitySum)
@@ -1663,9 +1665,9 @@ totalCosts_traits <- traits_costed %>%
 #    - Use total cell budget C_T for a reference bar (or separate build vs maintenance)
 
 ## Constants (Lynch & Marinov 2015, pulled from the supplementary table; 20 °C standard)
-C_M_per_h <- 1.159e9    # ATP / cell / hour (maintenance)
+C_M_per_h  <- 1.159e9    # ATP / cell / hour (maintenance)
 C_G_cell   <- 9.251e10  # ATP / cell (growth/build)
-gen_time_h <- 30/60     # 30 min generation. It might be longer for 20 °C 
+gen_time_h <- 1.16      # h generation at 20 °C 
 budget_ref <- C_G_cell + gen_time_h * C_M_per_h  # "total cell budget" bar
 
 ## Program window for maintenance 
@@ -1709,8 +1711,7 @@ bars_df <- totalCosts_traits %>%
   add_row(category = "developmental program", total = dev_total) %>%
   add_row(category = "maintenance (program window)", total = maintenance_prog) %>%
   add_row(category = "total cell budget", total = budget_ref) %>%  # anchor for %
-  filter(is.finite(total), total > 0) %>%
-  mutate(category2 = factor(category, levels = category))
+  filter(is.finite(total), total > 0)
 
 pretty_names <- c(
   "membrane lipid synthesis"     = "Membrane lipids",
@@ -1821,8 +1822,8 @@ dev_bar_total <- head_to_head_tbl$ATP[head_to_head_tbl$category == dev_name_pret
 # One-liners
 cat(sprintf("\nSpore life cycle = %.2f%% of total cell budget\n",
             100 * dev_bar_total / budget_ref))
-cat(sprintf("Maintenance during program = %.2f%% of total cell budget\n",
-            100 * head_to_head_tbl$ATP[head_to_head_tbl$category == 'Maintenance during program'] / budget_ref))
+cat(sprintf("Maintenance during cycle = %.2f%% of total cell budget\n",
+            100 * head_to_head_tbl$ATP[head_to_head_tbl$category == 'Maintenance during cycle'] / budget_ref))
 cat(sprintf("Genome replication = %.2f%% | Membrane lipids = %.2f%% of budget\n",
             100 * head_to_head_tbl$ATP[head_to_head_tbl$category == 'Genome replication'] / budget_ref,
             100 * head_to_head_tbl$ATP[head_to_head_tbl$category == 'Membrane lipids'] / budget_ref))
