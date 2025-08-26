@@ -1,11 +1,11 @@
 # Spore Costs
-# 21 July 2025 - last update
+#26 August 2025 - last update
 # Author: C. Karakoc
 
 ######################
 # Packages & Plotting 
 ######################
-##########################################################################
+
 library(tidyverse)       
 # ggplot theme
 library(scales) 
@@ -44,8 +44,6 @@ mytheme2 <- theme_bw()+
   theme(legend.title=element_blank())+
   theme(panel.border = element_rect(fill=NA, colour = "black", 
                                     linewidth=1)) +
-  #theme(axis.text.x.top = element_blank(), axis.title.x.top = element_blank(),
-  #     axis.text.y.right = element_blank(), axis.title.y.right = element_blank())+
   theme(axis.title.x = element_text(margin=margin(10,0,0)),
         axis.title.y = element_text(margin=margin(0,10,0,0)),
         axis.text.x = element_text(margin=margin(10,0,0,0)),
@@ -63,7 +61,6 @@ setwd("~/Documents/GitHub/cost_of_spore")
 ######################
 # Data
 ######################
-##########################################################################
 
 # Sporulation efficiency (corresponds to the SI Table 1 with full dataset of the papers)
 efficiencyEmp     <- read.table("./efficiency/empirical/data/efficiency.csv", sep = ",", dec = "," , header = T, stringsAsFactors = F)
@@ -73,15 +70,15 @@ efficiencyEmp     <- read.table("./efficiency/empirical/data/efficiency.csv", se
 #################################
 
 efficiencyEmp$efficiency <- as.numeric(efficiencyEmp$efficiency)
-median(as.numeric(efficiencyEmp$efficiency))
+med.efficiency <- median(as.numeric(efficiencyEmp$efficiency))
 
 efficiencyPlot <- ggplot(efficiencyEmp, aes(efficiency))+
   geom_density(linewidth = 1.6, color = "#0072B2")+
   xlab("Sporulation efficiency (%)")+
   ylab("Frequency")+
-  geom_vline(xintercept = 30, color = "black", linetype = "dashed" )+
+  geom_vline(xintercept = med.efficiency, color = "black", linetype = "dashed" )+
   coord_cartesian(ylim = c(0.0025, 0.0125))+
-  annotate(geom = "label", x = 33, y = 0.005, color ="black", fill = "white", label = "Median = 30%")+
+  annotate(geom = "label", x = 33, y = 0.005, color ="black", fill = "white", label = "Median = 31%")+
   scale_x_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), labels = c(0,25,50,75,100))+
   mytheme
   
@@ -103,8 +100,8 @@ means$lower = means$M-means$error
 
 efficiencyPlot <- ggplot(densityPlot, aes(x = x.new))+
   geom_density(alpha = 0.1, linewidth = 0.8, bw = 11.35555, color = "#0072B2")+
-  geom_vline(xintercept = c(means$M), linetype = 'dashed', color = "black")+
-  annotate(geom = "label", x = 33, y = 0.005, color = "black", fill = "white", label = "Median = 30.6%")+
+  geom_vline(xintercept = med.efficiency, linetype = 'dashed', color = "black")+
+  annotate(geom = "label", x = 33, y = 0.005, color = "black", fill = "white", label = "Median = 31%")+
   labs(x="Sporulation efficiency", y = "Density")+
   mytheme + 
   scale_x_continuous(limits = c(-30,130), sec.axis = dup_axis())+
@@ -187,20 +184,24 @@ for (i in 1:ncol(new_data_final_eff)) {
   new_data_final_eff[, i] <- as.numeric(new_data_final_eff[, i])
 }
 
-efficiencyP <-  ggplot(new_data_final_eff, aes(x = spore_vs_cell_atp_ratio, y = sporulation_efficiency))+
-  geom_vline(xintercept = 0.2668621700879765, linetype = "dashed")+
-  geom_line(size = 1.3, color = "#0072B2")+
-  mytheme+
-  labs(x = "Ratio of energetic costs, spore/cell", y = "Sporulation efficiency")+ 
-  scale_y_continuous(trans = "log10", breaks = c(10^-3, 10^-2, 10^-1), 
-                     labels = function(x) parse(text = paste0("10^", format(log10(x), digits = 2))), sec.axis = dup_axis())+
-  scale_x_continuous(trans = "log10", labels = function(x) parse(text = paste0("10^", format(log10(x), digits = 2))),sec.axis = dup_axis())+
-  theme(legend.position = "none")+
-  annotate("text", x = 10^-0.9, y = 10^-2.4, label = "Emprical estimate", size = 6, angle = 90)
+# spore/cell empirical estimate
+ratio_estimate <- 2385796113/93854440000 # from bioaccounting C_spore/C_cell_budget
 
+efficiency_estimate <- ggplot(new_data_final_eff,
+            aes(x = spore_vs_cell_atp_ratio, y = sporulation_efficiency)) +
+  geom_line(size = 1.3, colour = "#0072B2") +
+  geom_vline(xintercept = ratio_estimate, linetype = "dashed") +
+  labs(x = "Ratio of energetic costs, spore/cell",
+       y = "Sporulation efficiency") +
+  scale_x_log10(breaks = 10^seq(-4, 4, 1), labels = label_log()) +
+  scale_y_log10(limits = c(1e-3, 1e-1),
+                breaks = 10^seq(-3, 0, 1),
+                labels = label_log()) +
+  mytheme+
+  annotate("text", x = 10^-1.9, y = 10^-2.5, label = "Emprical estimate", size = 6, angle = 90)
 ##########################################################################################################
 
-figure4 <- ggarrange(efficiencyPlot, plot1, efficiencyP,
+figure4 <- ggarrange(efficiencyPlot, plot1, efficiency_estimate,
                      labels = c("A", "B", "C"),
                      ncol = 3, nrow = 1)
 

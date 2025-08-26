@@ -47,7 +47,7 @@ theme(axis.text.x.top = element_blank(), axis.title.x.top = element_blank(),
 # Color blind palette
 cbpalette <- c("#0072B2", "#D55E00","#009E73", "#CC79A7", "#56B4E9", "#999999", "#F0E442", "#000000")
 
-#setwd("~/Documents/GitHub/cost_of_spore")
+setwd("~/Documents/GitHub/cost_of_spore")
 
 
 #######
@@ -1838,4 +1838,3 @@ cat(sprintf("Genome replication = %.2f%% | Membrane lipids = %.2f%% of budget\n"
 all_cycle <- (dev_total + genome_tot + membraneRevTot + septumTot)
 relative_cost <- all_cycle/budget_ref #10% 
 
-  

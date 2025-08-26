@@ -1,8 +1,29 @@
-.Rproj.user
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# R / RStudio
+.Rproj.user/
 .Rhistory
 .RData
+.Rapp.history
+*.Rproj
 .Ruserdata
-.Rproj
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+EOF
+
 .DS_Storeefficiency/model/code/__pycache__/
 .DS_Store
-efficiency/model/code/__pycache__/
+efficiency/model/code/__pycache__/.venv/
+.venv/
+.venv/
+.venv/

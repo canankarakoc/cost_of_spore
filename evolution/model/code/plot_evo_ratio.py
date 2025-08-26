@@ -34,7 +34,7 @@ Ne_all = [1e6, 1e7, 1e8]
 
 # in unit ATPs
 # average per-nucleotide cost
-cost_nucleotide = 45.1875
+cost_nucleotide = 46.875
 cellular_budet = 93854440000
 s = cost_nucleotide/cellular_budet
 
