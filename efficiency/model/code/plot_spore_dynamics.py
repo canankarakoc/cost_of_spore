@@ -1,9 +1,13 @@
 import numpy
+import os
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint, solve_ivp
 
 import simulation_utils
-import config
+#import config
+
+
+repo_dir = os.path.expanduser("~/GitHub/cost_of_spore/")
 
 
 
@@ -26,7 +30,7 @@ s = 0.1
 #sigma = 1000.2*r_0
 sigma = 5
 
-k_spore = 0.01*r_0
+k_spore = 0.05*r_0
 
 
 
@@ -55,7 +59,7 @@ def plot_cr():
     ax.plot(t, z[0,:], ls='-', c='k', lw=2, label='Resource concentration')
     ax.plot(t, z[1,:], ls='-', c='b', lw=2, label='Cell density')
 
-    ax.set_yscale('log', basey=10)
+    ax.set_yscale('log', base=10)
 
     ax.set_xlabel("Time (hrs)", fontsize = 12)
     ax.set_ylabel("Variable", fontsize = 12)
@@ -66,7 +70,8 @@ def plot_cr():
 
 
     fig.subplots_adjust(hspace=0.25, wspace=0.25)
-    fig_name = "%stest_cr.png" % (config.analysis_directory)
+    #fig_name = "%stest_cr.png" % (config.analysis_directory)
+    fig_name = "%sefficiency/model/figures/test_cr.png" % repo_dir
     fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
@@ -84,7 +89,7 @@ def plot_cr_spores():
     ax.plot(t, z[1,:], ls='-', c='b', lw=2, label='Cell density')
     ax.plot(t, z[2,:], ls='-', c='r', lw=2, label='Spore density')
 
-    ax.set_yscale('log', basey=10)
+    ax.set_yscale('log', base=10)
 
     ax.set_xlabel("Time (hrs)", fontsize = 12)
     ax.set_ylabel("Variable", fontsize = 12)
@@ -94,14 +99,19 @@ def plot_cr_spores():
     ax.legend(loc='lower left')
 
     fig.subplots_adjust(hspace=0.25, wspace=0.25)
-    fig_name = "%scr_spores.png" % (config.analysis_directory)
+    #fig_name = "%scr_spores.png" % (config.analysis_directory)
+    fig_name = "%sefficiency/model/figures/cr_spores.png" % repo_dir
+
     fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
 
 
     # save data for Canan as flat file
-    data_file_path = '%sconsumer_resource_spore_model.tsv' % config.data_directory
+    #data_file_path = '%sconsumer_resource_spore_model.tsv' % config.data_directory
+    data_file_path = '%sefficiency/model/data/consumer_resource_spore_model.tsv' % repo_dir
+    
+    
     data_file = open(data_file_path, 'w')
     
     time_str =  'hours\t' + ",".join(str(x) for x in t)
@@ -160,13 +170,13 @@ def plot_cost_vs_efficiency():
     #ax.plot(x_axis, efficiency_24_all, ls='--', c='k', lw=2, label='24 hrs.')
     ax.plot(x_axis, efficiency_48_all, ls='-', c='k', lw=2)
 
-    ax.set_xscale('log', basex =10)
-    ax.set_yscale('log', basey=10)
+    ax.set_xscale('log', base=10)
+    ax.set_yscale('log', base=10)
 
     ax.set_xlabel("Ratio of energetic costs," + r'$ \frac{\mathrm{Spore}}{\mathrm{Cell}}$', fontsize = 12)
     ax.set_ylabel("Sporulation efficiency", fontsize = 12)
 
-    ax.axvline(x=1/20, ls=':', c='k', lw=1.5, label='Empirical estimate')
+    ax.axvline(x=simulation_utils.cost_of_spore/simulation_utils.cost_of_cell, ls=':', c='k', lw=1.5, label='Empirical estimate')
     ax.legend(loc='lower left')
 
     #ax.set_ylim([1e-3, 1e10])
@@ -174,13 +184,16 @@ def plot_cost_vs_efficiency():
 
 
     fig.subplots_adjust(hspace=0.25, wspace=0.25)
-    fig_name = "%scr_spores_efficiency.png" % (config.analysis_directory)
+    #fig_name = "%scr_spores_efficiency.png" % (config.analysis_directory)
+    fig_name = "%sefficiency/model/figures/cr_spores_efficiency.png" % repo_dir
     fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
 
     # save data for Canan as flat file
-    data_file_path = '%sefficiency_data.tsv' % config.data_directory
+    #data_file_path = '%sefficiency_data.tsv' % config.data_directory
+    data_file_path = '%sefficiency/model/data/efficiency_data.tsv' % repo_dir
+    
     data_file = open(data_file_path, 'w')
     time_str =  'spore_vs_cell_atp_ratio\t' + ",".join(str(x) for x in x_axis)
     efficiency_str = 'sporulation_efficiency\t' + ",".join(str(x) for x in efficiency_48_all)

@@ -1,5 +1,9 @@
 import numpy
 import config
+import os
+
+repo_dir = os.path.expanduser("~/GitHub/cost_of_spore/")
+
 
 import matplotlib.pyplot as plt
 
@@ -82,7 +86,7 @@ ax.set_ylabel("Fraction " + r'$\geq \Delta$', fontsize = 12)
 
 
 fig.subplots_adjust(hspace=0.60,wspace=0.45)
-fig_name = "%sdeletion_size_dist.png" % config.analysis_directory
+fig_name = "%sevolution/empirical/figure/deletion_size_dist.png" % repo_dir
 fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
 

@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint, solve_ivp
 
 import simulation_utils
-import config
+#import config
+import os
+repo_dir = os.path.expanduser("~/GitHub/cost_of_spore/")
 
 
 
@@ -66,13 +68,14 @@ def plot_example():
 
     ax.set_xlim([0, 48])
     ax.set_ylim([1e-6, 2*chemostat_prediction])
-    ax.set_yscale('log', basey=10)
+    ax.set_yscale('log', base=10)
     ax.legend(loc='upper left')
     ax.set_xlabel("Time (hrs.)", fontsize = 10)
     ax.set_ylabel("Sporulation efficiency", fontsize = 10)
 
     fig.subplots_adjust(hspace=0.25, wspace=0.25)
-    fig_name = "%scompare_model_theory.png" % (config.analysis_directory)
+    #fig_name = "%scompare_model_theory.png" % (config.analysis_directory)
+    fig_name = "%sefficiency/model/figures/compare_model_theory.png" % repo_dir
     fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
@@ -143,8 +146,8 @@ def plot_prediction_accuracy():
     ax_monod_compare.set_ylim([min(all_monod_data), max(all_monod_data)])
     ax_monod_compare.plot([min(all_monod_data), max(all_monod_data)], [min(all_monod_data), max(all_monod_data)], ls=':', lw=2, c='k', label='1:1')
 
-    ax_monod_compare.set_xscale('log', basex=10)
-    ax_monod_compare.set_yscale('log', basey=10)
+    ax_monod_compare.set_xscale('log', base=10)
+    ax_monod_compare.set_yscale('log', base=10)
     ax_monod_compare.legend(loc='upper left', fontsize=8)
     ax_monod_compare.set_xlabel("Simulated sporulation efficiency", fontsize = 10)
     ax_monod_compare.set_ylabel("Predicted sporulation efficiency", fontsize = 10)
@@ -152,8 +155,8 @@ def plot_prediction_accuracy():
 
     ### ax_monod_accuracy
     #ax_monod_accuracy.axhline(y=1, lw=2, ls=':', c='k')
-    ax_monod_accuracy.set_xscale('log', basex=10)
-    ax_monod_accuracy.set_yscale('log', basey=10)
+    ax_monod_accuracy.set_xscale('log', base=10)
+    ax_monod_accuracy.set_yscale('log', base=10)
     ax_monod_accuracy.legend(loc='upper right',  fontsize=8)
     ax_monod_accuracy.set_xlabel("Rescaled sporulation Monod constant, " + r'$K_{s}/R_{0}$' , fontsize = 10)
     ax_monod_accuracy.set_ylabel("Relative error of prediction", fontsize = 10)
@@ -210,8 +213,8 @@ def plot_prediction_accuracy():
     ax_signal_compare.set_ylim([min(all_signal_data), max(all_signal_data)])
     ax_signal_compare.plot([min(all_signal_data), max(all_signal_data)], [min(all_signal_data), max(all_signal_data)], ls=':', lw=2, c='k', label='1:1')
 
-    ax_signal_compare.set_xscale('log', basex=10)
-    ax_signal_compare.set_yscale('log', basey=10)
+    ax_signal_compare.set_xscale('log', base=10)
+    ax_signal_compare.set_yscale('log', base=10)
     ax_signal_compare.legend(loc='upper left', fontsize=8)
     ax_signal_compare.set_xlabel("Simulated sporulation efficiency", fontsize = 10)
     ax_signal_compare.set_ylabel("Predicted sporulation efficiency", fontsize = 10)
@@ -220,8 +223,8 @@ def plot_prediction_accuracy():
 
     ### ax_monod_accuracy
     #ax_monod_accuracy.axhline(y=1, lw=2, ls=':', c='k')
-    ax_signal_accuracy.set_xscale('log', basex=10)
-    ax_signal_accuracy.set_yscale('log', basey=10)
+    ax_signal_accuracy.set_xscale('log', base=10)
+    ax_signal_accuracy.set_yscale('log', base=10)
     ax_signal_accuracy.legend(loc='upper right',  fontsize=8)
     ax_signal_accuracy.set_xlabel('"Sharpness" of spore formation initiation, ' + r'$\sigma$', fontsize = 10)
     ax_signal_accuracy.set_ylabel("Relative error of prediction", fontsize = 10)
@@ -229,7 +232,8 @@ def plot_prediction_accuracy():
 
 
     fig.subplots_adjust(hspace=0.25, wspace=0.25)
-    fig_name = "%sprediction_accuracy.png" % (config.analysis_directory)
+    #fig_name = "%sprediction_accuracy.png" % (config.analysis_directory)
+    fig_name = "%sefficiency/model/figures/prediction_accuracy.png" % repo_dir
     fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
     plt.close()
 
@@ -245,5 +249,6 @@ def plot_prediction_accuracy():
 
 
 plot_prediction_accuracy()
+plot_example()
 
 
