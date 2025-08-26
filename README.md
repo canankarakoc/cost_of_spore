@@ -12,10 +12,10 @@ It also incorporates these estimates into mechanistic models to show how metabol
 
 ## Project Structure
 
-bioaccounting/:   Bioenergetic calculations using by-the-numbers, spore formation and revival data.
-efficiency/:      Data and plots related to sporulation efficiency across studies. 
+- bioaccounting/:   Bioenergetic calculations using by-the-numbers, spore formation and revival data.
+- efficiency/:      Data and plots related to sporulation efficiency across studies. 
                   Models for population dynamics in batch and chemostat conditions and sporulation efficiency.
-evolution/:       Data and figures of sporulation COGs. Model outputs and figures related to evolutionary dynamics.
+- evolution/:       Data and figures of sporulation COGs. Model outputs and figures related to evolutionary dynamics.
 
 
 ---
