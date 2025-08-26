@@ -15,7 +15,10 @@ r_max_spore = 1/8
 y_v = 10**6 # (maybe)
 #(4*10**10)/ (2*10**9) = 20, spore formation is 20X more efficient than cell formation
 #y_s = 20*y_v
-y_s = 20*y_v
+cost_of_cell = 93854440000
+cost_of_spore = 2385796113
+y_s = (cost_of_cell/cost_of_spore)*y_v
+#y_s = 2385796113
 
 
 

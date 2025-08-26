@@ -1,7 +1,9 @@
-import config
+#import config
 import numpy
 import matplotlib.pyplot as plt
+import os
 
+repo_dir = os.path.expanduser("~/GitHub/cost_of_spore/")
 
 
 # colors_dict = {'0':'#87CEEB', '1': '#FFA500', '2':'#FF6347'}
@@ -31,8 +33,9 @@ u_del = 0.91e-10
 Ne_all = [1e6, 1e7, 1e8]
 
 # in unit ATPs
-cost_nucleotide = 50
-cellular_budet = 2e10
+# average per-nucleotide cost
+cost_nucleotide = 45.1875
+cellular_budet = 93854440000
 s = cost_nucleotide/cellular_budet
 
 def calculate_ratio_rates(Ne, deletion_size, u_del_):
@@ -74,8 +77,8 @@ ax.plot(deletion_size_all, ratio_rates_higher, ls='-', lw=2, alpha=1, label=r'$N
 ax.axhline(y=u_del/u_sub, lw=2, ls=':', c='k', label='Neutrality')
 
 
-ax.set_xscale('log', basex=10)
-ax.set_yscale('log', basey=10)
+ax.set_xscale('log', base=10)
+ax.set_yscale('log', base=10)
 ax.set_xlabel("Deletion size (bp), " + r'$\Delta$', fontsize = 12)
 ax.set_ylabel("Deletion vs. substitution fixation rates under\nrelaxed selection for spore formation, " + r'$ \frac{d_{\mathrm{del}}}{d_{\mathrm{sub}}}$', fontsize = 11)
 
@@ -84,7 +87,9 @@ ax.set_ylabel("Deletion vs. substitution fixation rates under\nrelaxed selection
 ax.legend(loc='upper left', fontsize=7)
 
 #fig.subplots_adjust(hspace=0.4, wspace=0.35)
-fig_name = "%sevo_ratio.png" % config.analysis_directory
+#fig_name = "%sevo_ratio.png" % config.analysis_directory
+fig_name = "%sevolution/model/figures/evo_ratio.png" % repo_dir
+
 fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
 
@@ -93,7 +98,9 @@ plt.close()
 #print(u_del/u_sub)
 
 # save data for Canan as flat file
-data_file_path = '%sevo_ratio.tsv' % config.data_directory
+#data_file_path = '%sevo_ratio.tsv' % config.data_directory
+data_file_path = '%sevolution/model/data/evo_ratio.tsv' % repo_dir
+
 data_file = open(data_file_path, 'w')
 
 deletion_size_str =  'deletion_size\t' + ",".join(str(x) for x in deletion_size_all)
@@ -153,22 +160,24 @@ ax.scatter(deletion_size_conditional_all, null_ratio, s=10, alpha=1, c='k', zord
 #ax.axhline(y=u_del/u_sub, lw=2, ls=':', c='k', label='Neutrality')
 
 #ax.set_xscale('log', basex=10)
-ax.set_yscale('log', basey=10)
+ax.set_yscale('log', base=10)
 ax.set_xlabel("Deletion size (bp), " + r'$\Delta$', fontsize = 12)
 ax.set_ylabel("Deletion vs. substitution fixation rate nunder\nrelaxed selection for spore formation, " + r'$ \frac{d_{\mathrm{del}} (\Delta) }{d_{\mathrm{sub}}}$', fontsize = 11)
-ax.set_xscale('log', basex=10)
+ax.set_xscale('log', base=10)
 ax.legend(loc='upper left', fontsize=7)
 
 #fig.subplots_adjust(hspace=0.4, wspace=0.35)
-#fig_name = "/Users/williamrshoemaker/GitHub/sporecosts_model/analysis/evo_ratio_conditional.png"
-fig_name = "%sevo_ratio_conditional.png" % config.analysis_directory
+#fig_name = "%sevo_ratio_conditional.png" % config.analysis_directory
+fig_name = "%sevolution/model/figures/evo_ratio_conditional.png" % repo_dir
 fig.savefig(fig_name, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()
 
 
 
 # save data for Canan as flat file
-data_file_path = '%sevo_ratio_conditional.tsv' % config.data_directory
+#data_file_path = '%sevo_ratio_conditional.tsv' % config.data_directory
+data_file_path = '%sevolution/model/data/evo_ratio_conditional.tsv' % repo_dir
+
 data_file = open(data_file_path, 'w')
 
 deletion_size_str =  'deletion_size\t' + ",".join(str(x) for x in deletion_size_conditional_all)

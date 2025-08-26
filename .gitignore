@@ -3,4 +3,6 @@
 .RData
 .Ruserdata
 .Rproj
+.DS_Storeefficiency/model/code/__pycache__/
 .DS_Store
+efficiency/model/code/__pycache__/
