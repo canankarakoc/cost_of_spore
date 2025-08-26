@@ -1,13 +1,12 @@
 # Evolutionary bioenergetics of sporulation
 
-**Last updated:** 21 July 2025  
+**Last updated:** 26 August 2025  
 **Authors:** Canan Karakoç,  William R. Shoemaker, Jay T. Lennon
 
 This repository contains the complete analysis pipeline of the manuscript "Evolutionary bioenergetics of sporulation". 
 The project integrates genomic, proteomic, transcriptomic, and by-the-number datasets to quantify ATP investment across the spore lifecycle, 
 compares with other cellular investments.
-It also incorporates these estimates into mechanistic models to show how metabolic constraints shape sporulation efficiency, and how this 
-developmental program becomes visible to selection. Analysis then compare these estimations with empirical data. 
+It also incorporates these estimates into mechanistic models to show how metabolic constraints shape sporulation efficiency, and how this developmental program becomes visible to selection. 
 
 ---
 
@@ -24,17 +23,17 @@ evolution/:       Data and figures of sporulation COGs. Model outputs and figure
 ## Getting Started
 
 - All by-the-numbers calculations in the manuscript are embedded in the  R code with their references, 
-such as membrane area and membrane costs calculations, genome size, nucleotide costs, replication costs.
+such as membrane area and membrane costs calculations, genome size, nucleotide costs, and replication costs.
 - Key datasets such as amino acid costs, spore-formation, and revival genes/proteins are listed below. 
-- Project includes models, and simulations written in Python and codes are provided in their respective folders. 
+- The project includes models and simulations written in Python, and the codes are provided in their respective folder. 
 
 To reproduce the analysis:
 
 1. Run `code\cost_of_spore.R` from the top for bioaccounting. Ensure the working directory is set properly.
 2. Run Python codes to reproduce data for population dynamics, spore efficiency, and evolutionary analysis. 
-Codes are stored in "efficiency" and "evolution"" sections under "model" folders. 
+Codes are stored in "efficiency" and "evolution" sections under "model" folders. 
 3. Run `efficiency_plots.R` and `COGs_figures.R` to reproduce figures of empirical and model data of 
-population dynamics, efficiency, evolutionary outcomes. These codes are stored under respective sections and "empirical" folders. 
+population dynamics, efficiency, and evolutionary outcomes. These codes are stored under respective sections and "empirical" folders. 
 
 ---
 
@@ -47,11 +46,11 @@ population dynamics, efficiency, evolutionary outcomes. These codes are stored u
 | Protein abundance | [PAX-db](https://pax-db.org/) |
 | Newly synthesized proteins during germination | [Swarge et al. 2020](https://doi.org/10.1128/mSphere.00463-20) |
 | Protein sequences | [UniProt: B. subtilis 168](https://www.uniprot.org/taxonomy/224308) |
-| Amino acid/nucleotide ATP costs | [Lynch & Marinov, 2015](https://doi.org/10.1073/pnas.1701670114) |
+| Amino acid/nucleotide ATP costs | [Mahmoudabadi et al. 2017](https://doi.org/10.1073/pnas.1701670114) |
 
 ---
 
-## Cost definitions used thought the analysis
+## Cost definitions used throughout the analysis
 
 | Cost Type | Description |
 |-----------|-------------|
@@ -64,7 +63,7 @@ population dynamics, efficiency, evolutionary outcomes. These codes are stored u
 ## Empirical data for COGs and efficiency 
 
 Spore-related COGs are derived from [Galperin et al. 2022](https://journals.asm.org/doi/10.1128/jb.00079-22). 
-See manuscript for empirical efficiency data derived from various sources. 
+See manuscript, supplementary information for empirical efficiency data derived from various sources. 
 
 ---
 
@@ -72,7 +71,7 @@ See manuscript for empirical efficiency data derived from various sources.
 
 - **Figure 1**: Cumulative ATP costs of sporulation over time. (bioaccounting/)
 - **Figure 2**: Energetic costs of germination and outgrowth. (bioaccounting/)
-- **Figure 3**: Comparison with alternative stress responses and cellular proccesses. (bioaccounting/)
+- **Figure 3**: Comparison with alternative stress responses and cellular processes. (bioaccounting/)
 - **Figure 4**: Empirical and theoretical models of sporulation efficiency. (efficiency/)
 - **Figure 5**: COG distributions and evolutionary constraints. (evolution/)
 
@@ -88,11 +87,10 @@ See embedded DOIs in script comments. Full reference list available in the manus
 ##  Reproducibility Notes
 
 - All scripts are annotated and reproducible within the RStudio project.
-- Final manuscript figures formated in Adobe Illustrator.  
+- Final manuscript figures formatted in Adobe Illustrator.  
 
 ---
 
 ## Contact
 
 Jay T. Lennon — [lennonj@iu.edu](mailto:lennonj@iu.edu)
-# Minor update for pull request test

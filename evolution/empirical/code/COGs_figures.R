@@ -1,11 +1,11 @@
 # COGs and evolution plots
-# 21 July 2025 - last update
+# 26 August 2025 - last update
 # Author: C. Karakoc
 
 ######################
 # Packages & Plotting 
 ######################
-##########################################################################
+
 library(tidyverse)       
 library(stringr) 
 #plotting
@@ -41,8 +41,6 @@ mytheme2 <- theme_bw()+
   theme(legend.title=element_blank())+
   theme(panel.border = element_rect(fill=NA, colour = "black", 
                                     linewidth=1)) +
-  #theme(axis.text.x.top = element_blank(), axis.title.x.top = element_blank(),
-  #     axis.text.y.right = element_blank(), axis.title.y.right = element_blank())+
   theme(axis.title.x = element_text(margin=margin(10,0,0)),
         axis.title.y = element_text(margin=margin(0,10,0,0)),
         axis.text.x = element_text(margin=margin(10,0,0,0)),
@@ -55,19 +53,14 @@ mytheme2 <- theme_bw()+
 # Color blind palette
 cbpalette <- c("#0072B2", "#D55E00","#009E73", "#CC79A7", "#56B4E9", "#999999", "#F0E442", "#000000")
 
-setwd("~/Documents/GitHub/cost_of_spore")
+#setwd("~/Documents/GitHub/cost_of_spore")
 
 ######################
 # Data
 ######################
-##########################################################################
 
-# COGs - Galperin
+# COGs - Galperin et al., 2022
 meta_data   <- read.table("./evolution/empirical/data/calc_meta.csv", sep = ",", dec = "." , header = T, stringsAsFactors = F)
-
-##################################
-# COGs from Galperin et al., 2022
-##################################
 
 meta_data$No._proteins_numeric <- as.numeric(gsub(",", "", meta_data$No._proteins))
 
@@ -83,12 +76,13 @@ meta_data_clean <- meta_data %>%
 msPlot <- ggplot(meta_data_clean, aes(x = All_spore_COGs_.out_of_237., color = Spore_former))+
   geom_histogram(aes(y = ..density.., fill = Spore_former),color = "grey50", bins = 30, alpha = 0.4, linewidth = 0.5)+
   geom_density(linewidth = 1.2, aes(group = Spore_former))+
-  xlab(expression("Present spore COGs (COG"[Total] == 237*")"))+
+  xlab("Present spore COGs")+
   ylab("Frequency")+
   mytheme+
   scale_fill_manual(values = c("#0072B2", "#D55E00"), labels = c("Non-spore-former", "Spore-former")) +
   scale_color_manual(values = c("#0072B2", "#D55E00"), labels = c("Non-spore-former", "Spore-former")) +
-  theme(legend.position = c(0.8,0.8))+
+  theme(legend.position = c(0.75,0.85))+
+  theme(legend.text = element_text(size = 14))+
   scale_y_continuous(sec.axis = dup_axis())+
   scale_x_continuous(sec.axis = dup_axis())
                     
@@ -143,7 +137,7 @@ evorates_av_plot <- ggplot(evorates_av, aes(x = log10(deletion_size), y = log10(
   xlab(expression("Deletion size (bp),"~Delta))+
   ylab(expression(atop("Ratio of deletion size " * Delta, "relative to substitutions, " * frac(d[del](Delta), d[sub]))))+
   mytheme+
-  theme(legend.position = c(0.2, 0.85), legend.background = element_rect(fill = "white"))+
+  theme(legend.position = c(0.3, 0.85), legend.background = element_rect(fill = "white"))+
   theme(legend.text = element_text(size = 14))+
   scale_fill_manual(values = c("#0072B2", "grey25"), labels = custom_labels2)+
   scale_color_manual(values = c("#0072B2", "grey25"), labels = custom_labels2)+
