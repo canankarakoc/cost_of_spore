@@ -1838,3 +1838,302 @@ cat(sprintf("Genome replication = %.2f%% | Membrane lipids = %.2f%% of budget\n"
 all_cycle <- (dev_total + genome_tot + membraneRevTot + septumTot)
 relative_cost <- all_cycle/budget_ref #10% 
 
+#________________________________________________________________________________
+# REVISION - 6 November 2025 
+#________________________________________________________________________________
+
+####################################
+# Head to Head comparisons of traits 
+# Figure 3: Per-generation-time normalized costs
+# Manuscript: 
+# Results: "Head-to-head comparison"
+####################################
+
+# Other cellular structures (non-sporulation/germination/outgrowth)
+# Build costs normalized to per-generation-time equivalents
+
+# constants (already defined upstream) 
+# poly_costs <- 2
+# rna_nucleotide_cost_synthesis <- rna_nucleotide_cost_dir - poly_costs  # c_sr
+# yield <- 100  # proteins per mRNA lifetime
+
+# Medians for safe fills 
+# prot_len_med 
+# gene_len_med
+
+#  Map trait genes → locus_tag via SubtiWiki symbols (primary), then join protein table
+#  Exclude developmental program categories to avoid double-counting with time-series blocks
+trait_floor_copies <- 0  # set to >0 to increase floor
+
+traits_base <- otherTraits %>%
+  filter(!category %in% c("sporulation", "germination", "outgrowth")) %>%
+  mutate(gene_std = std(gene)) %>%
+  left_join(
+    annotation_clean %>% select(gene_std, locus_tag, gene_length, protein_length),
+    by = "gene_std"
+  ) %>%
+  # bring in abundance-derived fields and AA costs
+  left_join(
+    protSeqTidyAbun %>%
+      select(locus_tag, proteins_per_cell, aa_directSum, aa_opportunitySum),
+    by = "locus_tag") %>%
+  # prefer numeric lengths from prot table; fall back to annotation; then to medians
+  mutate(
+    gene_length      = coalesce(gene_length,  gene_len_med),
+    protein_length   = coalesce(protein_length, prot_len_med),
+    proteins_per_cell = coalesce(proteins_per_cell, trait_floor_copies)
+  ) %>%
+  select(category, gene = gene, locus_tag, proteins_per_cell,
+         gene_length, protein_length, aa_directSum, aa_opportunitySum)
+
+# Fill missing AA cost sums conservatively with medians (per-protein totals)
+med_aa_dir <- median(traits_base$aa_directSum,      na.rm = TRUE)
+med_aa_opp <- median(traits_base$aa_opportunitySum, na.rm = TRUE)
+
+traits_costed <- traits_base %>%
+  mutate(
+    aa_dir_f = coalesce(aa_directSum,      med_aa_dir),
+    aa_opp_f = coalesce(aa_opportunitySum, med_aa_opp),
+    
+    # Translation build: copies × per-protein AA cost
+    trans_direct = proteins_per_cell * aa_dir_f,
+    trans_opp    = proteins_per_cell * aa_opp_f,
+    trans_total  = trans_direct + trans_opp,
+    
+    # Transcription build: one-time synthesis of the mRNAs needed
+    transcripts_total = proteins_per_cell / yield,
+    nt_total          = transcripts_total * gene_length,
+    tx_direct_once    = nt_total * rna_nucleotide_cost_synthesis,
+    tx_opp_once       = nt_total * rna_nucleotide_cost_opp,
+    tx_total_once     = tx_direct_once + tx_opp_once
+  )
+
+#  Aggregate per category (build-only costs)
+totalCosts_traits <- traits_costed %>%
+  group_by(category) %>%
+  summarise(
+    translation_direct        = sum(trans_direct,   na.rm = TRUE),
+    translation_opportunity   = sum(trans_opp,      na.rm = TRUE),
+    transcription_direct      = sum(tx_direct_once, na.rm = TRUE),
+    transcription_opportunity = sum(tx_opp_once,  na.rm = TRUE),
+    total_build               = translation_direct + translation_opportunity +
+      transcription_direct + transcription_opportunity,
+    .groups = "drop"
+  ) %>%
+  select(category, total_build)
+
+## Constants (Lynch & Marinov 2015, pulled from the supplementary table; 20 °C standard)
+C_M_per_h  <- 1.159e9    # ATP / cell / hour (maintenance)
+C_G_cell   <- 9.251e10   # ATP / cell (growth/build)
+gen_time_h <- 1.16       # h generation at 20 °C 
+budget_ref <- C_G_cell + gen_time_h * C_M_per_h  # "total cell budget" bar
+
+## Per-generation-time normalization
+# Define duration (hours) for each trait category
+# These durations represent the characteristic timescale over which each trait operates
+trait_durations <- tribble(
+  ~category,              ~duration_h,  ~notes,
+  "flagella",             11.6,         "~45 min assembly, amortized over ~10 generation functional lifespan",
+  "chemotaxis_motility",  11.6,         "Persistent structures, ~10 generation lifespan",
+  "swarming",             11.6,         "Persistent structures, ~10 generation lifespan",
+  "biofilm",              12.0,         "Time to robust pellicle formation",
+  "competence",           3.0,          "Transient K-state duration",
+  "heat_shock",           1.16,         "Assumes per-generation resynthesis",
+  "homeostasis",          1.16,         "Assumes per-generation resynthesis",
+  "essential",            1.16,         "Assumes per-generation resynthesis"
+)
+
+# Normalize trait costs to per-generation-time equivalents
+# Formula: cost_per_gentime = total_build / (duration_h / gen_time_h)
+totalCosts_normalized <- totalCosts_traits %>%
+  left_join(trait_durations, by = "category") %>%
+  mutate(
+    # Convert to per-generation-time by dividing by number of generation-times
+    generation_times = duration_h / gen_time_h,
+    total = total_build / generation_times
+  ) %>%
+  select(category, total, duration_h, generation_times)
+
+## Program window for developmental cycle
+t_spor <- 8      # hours
+t_germ <- 0.25   # first 15 min
+t_outg <- 3.25   # until 210 min 
+t_program <- t_spor + t_germ + t_outg  # 11.5 h total (~10 generation-times)
+
+## Maintenance per generation-time (not per program window)
+maintenance_per_gentime <- C_M_per_h * gen_time_h  # ATP per generation-time
+
+## Developmental program total (build-only, NOT normalized - show total over 11.5 h)
+cost_sporulation <- cost_transcript + cost_translation
+
+cost_germ_015 <- germ_interval_costs %>%
+  filter(interval == "H0.25") %>%
+  summarise(v = sum(total, na.rm = TRUE)) %>% pull(v)
+
+cost_outgrowth_rest <- germ_interval_costs %>%
+  filter(interval %in% c("H0.5","H1","H1.5","H2.5","H3.5")) %>%
+  summarise(v = sum(total, na.rm = TRUE)) %>% pull(v)
+
+dev_parts <- tibble(
+  phase = c("germination (0.25 h)", "spore formation", "outgrowth"),
+  total = c(cost_germ_015, cost_sporulation, cost_outgrowth_rest)
+)
+
+dev_total <- sum(cost_sporulation, cost_germ_015, cost_outgrowth_rest) 
+
+## Build the bars table
+# For membrane & genome: normalize to per-generation-time
+membrane_per_gentime <- if (exists("membraneTot")) membraneTot / (gen_time_h / gen_time_h) else NA_real_
+genome_per_gentime   <- if (exists("genome_tot")) genome_tot / (gen_time_h / gen_time_h) else NA_real_
+
+bars_df <- totalCosts_normalized %>%
+  select(category, total) %>%
+  add_row(category = "membrane lipid synthesis", total = membrane_per_gentime) %>%
+  add_row(category = "genome replication",       total = genome_per_gentime) %>%
+  add_row(category = "developmental program",    total = dev_total) %>%  # NOT normalized
+  add_row(category = "maintenance",              total = maintenance_per_gentime) %>%  # per gen-time
+  add_row(category = "total cell budget",        total = budget_ref) %>%
+  filter(is.finite(total), total > 0)
+
+pretty_names <- c(
+  "membrane lipid synthesis"     = "Membrane lipids",
+  "genome replication"           = "Genome replication",
+  "developmental program"        = "Spore life cycle",
+  "maintenance"                  = "Basal maintenance",
+  "total cell budget"            = "Total cell budget",
+  "swarming"                     = "Swarming", 
+  "chemotaxis_motility"          = "Chemotaxis", 
+  "biofilm"                      = "Biofilm", 
+  "flagella"                     = "Flagella", 
+  "essential"                    = "Essential genes", 
+  "competence"                   = "Competence", 
+  "heat_shock"                   = "Heat shock proteins", 
+  "homeostasis"                  = "Homeostasis"
+)
+
+# keep only keys that actually exist to avoid warnings
+pretty_names <- pretty_names[names(pretty_names) %in% unique(bars_df$category)]
+
+bars_nice <- bars_df %>%
+  arrange(total) %>%                                
+  mutate(
+    category_pretty = recode(category, !!!pretty_names, .default = category),
+    category_pretty = factor(category_pretty, levels = unique(category_pretty))
+  )
+
+# Cumulative dotted marks for the program bar 
+dev_name_pretty <- recode("developmental program", !!!pretty_names)
+
+y_dev <- match(dev_name_pretty, levels(bars_nice$category_pretty))
+
+seg_df <- tibble(
+  x    = cumsum(dev_parts$total),  # germ, germ+spore, germ+spore+outgrowth
+  y    = y_dev,
+  ymin = y_dev - 0.38,
+  ymax = y_dev + 0.38
+)
+
+rlibrary(scales)  # Make sure scales is loaded
+
+# Calculate percentage breaks (as ATP values), including one for <1%
+pct_breaks <- budget_ref * c(0.1, 1, 10, 100) / 100
+
+xmin <- min(bars_nice$total[bars_nice$total > 0]) * 0.8
+xmax <- max(bars_nice$total) * 1.25
+
+# Set explicit breaks for the primary axis
+primary_breaks <- 10^(8:11)  # 10^8, 10^9, 10^10, 10^11
+
+# Filter to only breaks within plot range
+primary_breaks <- primary_breaks[primary_breaks >= xmin & primary_breaks <= xmax]
+
+# Labeling function for secondary axis
+pct_labeller <- function(x) {
+  sapply(x, function(val) {
+    diffs <- abs(log10(val) - log10(pct_breaks))
+    if(min(diffs) < 0.05) {
+      idx <- which.min(diffs)
+      return(c("<1", "1", "10", "100")[idx])
+    } else {
+      return("")
+    }
+  })
+}
+
+bar_width <- 0.8
+tick_half <- bar_width/2 + 0.1
+
+f3 <- ggplot() +
+  geom_col(
+    data = bars_nice,
+    aes(x = total, y = category_pretty),
+    width = bar_width, fill = "grey80", color = "black"
+  ) +
+  scale_x_log10(
+    name   = "ATP molecules",
+    breaks = primary_breaks,
+    labels = trans_format("log10", math_format(10^.x)),
+    expand = expansion(mult = c(0.08, 0.03)),
+    sec.axis = sec_axis(~ ., 
+                        breaks = pct_breaks, 
+                        labels = pct_labeller,
+                        name = "Costs relative to the cell budget (%)")
+  ) +
+  coord_cartesian(xlim = c(xmin * 0.8, xmax)) +
+  mytheme +
+  theme(
+    axis.title.x.top   = element_text(hjust = 0.5, size = 18),
+    axis.text.x.top    = element_text(size = 16),
+    axis.text.y        = element_text(margin = margin(r = 8)),
+    panel.grid.major.y = element_blank(),
+    panel.ontop        = FALSE
+  ) +
+  ylab(NULL) +
+  geom_segment(
+    data = seg_df |> dplyr::mutate(ymin = y - tick_half, ymax = y + tick_half),
+    aes(x = x, xend = x, y = ymin, yend = ymax),
+    inherit.aes = FALSE, linetype = "dotted", linewidth = 0.7
+  )
+
+#ggsave("bioaccounting/figures/figure3_comparison_revised.pdf", f3, height = 6, width = 7.5)
+
+#__________________________
+# Numbers for text/caption 
+#__________________________
+
+# Table with % of total cell budget
+head_to_head_tbl <- bars_nice %>%
+  transmute(
+    category = as.character(category_pretty),
+    ATP      = total,
+    pct_of_budget = 100 * total / budget_ref
+  ) %>%
+  arrange(desc(ATP))
+
+print(head_to_head_tbl, n = Inf)
+
+# Additional reporting
+cat("\n=== Per-generation-time normalization summary ===\n")
+cat(sprintf("Generation time: %.2f h at 20°C\n", gen_time_h))
+cat(sprintf("Spore life cycle duration: %.2f h (~%.1f generation-times)\n", 
+            t_program, t_program/gen_time_h))
+cat(sprintf("Basal maintenance per generation-time: %.2e ATP\n", maintenance_per_gentime))
+cat(sprintf("\nSpore life cycle (total over %.1f gen-times) = %.2f%% of cell budget\n",
+            t_program/gen_time_h, 100 * dev_total / budget_ref))
+cat(sprintf("Basal maintenance (per gen-time) = %.2f%% of cell budget\n",
+            100 * maintenance_per_gentime / budget_ref))
+
+# Show trait normalization details
+cat("\n=== Trait duration and normalization ===\n")
+totalCosts_normalized %>%
+  left_join(bars_nice %>% select(category, category_pretty), by = "category") %>%
+  transmute(
+    Trait = category_pretty,
+    Duration_h = duration_h,
+    Generation_times = round(generation_times, 1),
+    Cost_per_gentime = scales::scientific(total, digits = 2)
+  ) %>%
+  print(n = Inf)
+
+
+
