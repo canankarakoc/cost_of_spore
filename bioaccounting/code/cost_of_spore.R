@@ -1838,3 +1838,218 @@ cat(sprintf("Genome replication = %.2f%% | Membrane lipids = %.2f%% of budget\n"
 all_cycle <- (dev_total + genome_tot + membraneRevTot + septumTot)
 relative_cost <- all_cycle/budget_ref #10% 
 
+#________________________________________________________________________________
+# REVISION - 19 November 2025 
+#________________________________________________________________________________
+
+####################################
+# Figure 3: Per-generation-time normalized costs
+# Revised to address reviewer comments
+####################################
+
+# Define durations for traits that span multiple generations
+# NA means "instantaneous" or "per-generation already"
+trait_durations <- tribble(
+  ~category,              ~duration_h,  ~notes,
+  "biofilm",              12,           "Time to robust pellicle formation",
+  "competence",           3,            "Transient K-state duration",
+  "flagella",             NA_real_,     "Persistent structure, expressed per generation",
+  "swarming",             NA_real_,     "Uses flagella; expressed per generation",
+  "chemotaxis_motility",  NA_real_,     "Instantaneous - already per generation",
+  "essential",            NA_real_,     "Instantaneous - already per generation", 
+  "heat_shock",           NA_real_,     "Instantaneous - already per generation",
+  "homeostasis",          NA_real_,     "Instantaneous - already per generation"
+)
+
+## Constants (Lynch & Marinov 2015)
+C_M_per_h  <- 1.159e9    # ATP / cell / hour (basal maintenance)
+C_G_cell   <- 9.251e10   # ATP / cell (growth/build)
+gen_time_h <- 1.16       # generation time at 20°C (hours)
+budget_ref <- C_G_cell + gen_time_h * C_M_per_h  # Total cell budget per generation
+
+## Normalize all costs to per vegetative generation (1.16 h)
+# For programs: divide by (duration_h / gen_time_h)
+# For instantaneous traits: no adjustment (duration_h = NA or gen_time_h)
+
+totalCosts_normalized <- totalCosts_traits %>%
+  left_join(trait_durations, by = "category") %>%
+  mutate(
+    # Calculate how many generation-times this trait spans
+    generation_times = coalesce(duration_h / gen_time_h, 1.0),
+    
+    # Normalize to per generation
+    # If instantaneous (NA duration), generation_times = 1, no adjustment
+    # If multi-generation program, divide by generation_times
+    total = total/ generation_times
+  ) %>%
+  select(category, total, duration_h, generation_times)
+
+# Report normalization
+cat("\n=== Trait normalization to per vegetative generation ===\n")
+totalCosts_normalized %>%
+  transmute(
+    Category = category,
+    Duration_h = coalesce(duration_h, gen_time_h),
+    Gen_times = round(generation_times, 2),
+    Normalized_cost = scales::scientific(total, digits = 2),
+    Adjustment = ifelse(generation_times > 1, 
+                        sprintf("÷%.1f", generation_times), 
+                        "none")
+  ) %>%
+  print(n = Inf)
+
+## Developmental program: ONE complete spore generation (11.5 h)
+# This is NOT normalized - it represents one biological generation
+# for the spore life history pathway
+t_spor <- 8      # spore formation (hours)
+t_germ <- 0.25   # germination (first 15 min)
+t_outg <- 3.25   # outgrowth (until 210 min)
+t_program <- t_spor + t_germ + t_outg  # 11.5 h total
+
+# Spore cycle costs (transcription + translation only for comparison)
+cost_sporulation <- cost_transcript + cost_translation
+
+cost_germ_015 <- germ_interval_costs %>%
+  filter(interval == "H0.25") %>%
+  summarise(v = sum(total, na.rm = TRUE)) %>% pull(v)
+
+cost_outgrowth_rest <- germ_interval_costs %>%
+  filter(interval %in% c("H0.5","H1","H1.5","H2.5","H3.5")) %>%
+  summarise(v = sum(total, na.rm = TRUE)) %>% pull(v)
+
+dev_total <- sum(cost_sporulation, cost_germ_015, cost_outgrowth_rest)
+
+## Maintenance per generation-time (NOT per program window)
+maintenance_per_gentime <- C_M_per_h * gen_time_h
+
+## Build the bars table
+# Genome & membrane: already per vegetative generation (replication during 1.16h cycle)
+bars_df <- totalCosts_normalized %>%
+  select(category, total) %>%
+  add_row(category = "membrane lipid synthesis", 
+          total = membraneTot) %>%  # whole cell membrane, per veg gen
+  add_row(category = "genome replication",       
+          total = genome_tot) %>%   # whole genome, per veg gen
+  add_row(category = "developmental program",    
+          total = dev_total) %>%    # ONE complete spore generation (11.5h)
+  add_row(category = "maintenance",              
+          total = maintenance_per_gentime) %>%  # per veg gen (1.16h)
+  add_row(category = "total cell budget",        
+          total = budget_ref) %>%   # reference (C_G + C_M*gen_time)
+  filter(is.finite(total), total > 0)
+
+# Pretty names for display
+pretty_names <- c(
+  "membrane lipid synthesis"     = "Membrane lipids",
+  "genome replication"           = "Genome replication",
+  "developmental program"        = "Spore life cycle",
+  "maintenance"                  = "Maintenance energy",
+  "total cell budget"            = "Total cell budget",
+  "swarming"                     = "Swarming", 
+  "chemotaxis_motility"          = "Chemotaxis", 
+  "biofilm"                      = "Biofilm", 
+  "flagella"                     = "Flagellum", 
+  "essential"                    = "Essential genes", 
+  "competence"                   = "Competence", 
+  "heat_shock"                   = "Heat shock", 
+  "homeostasis"                  = "Homeostasis"
+)
+
+bars_nice <- bars_df %>%
+  arrange(total) %>%
+  mutate(
+    category_pretty = recode(category, !!!pretty_names, .default = category),
+    category_pretty = factor(category_pretty, levels = unique(category_pretty))
+  )
+
+# For the spore bar, add cumulative phase markers
+dev_name_pretty <- recode("developmental program", !!!pretty_names)
+y_dev <- match(dev_name_pretty, levels(bars_nice$category_pretty))
+
+dev_parts <- tibble(
+  phase = c("germination (0.25 h)", "spore formation", "outgrowth"),
+  total = c(cost_germ_015, cost_sporulation, cost_outgrowth_rest)
+)
+
+seg_df <- tibble(
+  x    = cumsum(dev_parts$total),
+  y    = y_dev,
+  ymin = y_dev - 0.38,
+  ymax = y_dev + 0.38
+)
+
+# Plot setup
+pct_breaks <- budget_ref * c(0.1, 1, 10, 100) / 100
+xmin <- min(bars_nice$total[bars_nice$total > 0]) * 0.8
+xmax <- max(bars_nice$total) * 1.25
+primary_breaks <- 10^(8:11)
+primary_breaks <- primary_breaks[primary_breaks >= xmin & primary_breaks <= xmax]
+
+pct_labeller <- function(x) {
+  sapply(x, function(val) {
+    diffs <- abs(log10(val) - log10(pct_breaks))
+    if(min(diffs) < 0.05) {
+      idx <- which.min(diffs)
+      return(c("0.1", "1", "10", "100")[idx])
+    } else {
+      return("")
+    }
+  })
+}
+
+bar_width <- 0.8
+tick_half <- bar_width/2 + 0.1
+
+# Create plot
+f3 <- ggplot() +
+  geom_col(
+    data = bars_nice,
+    aes(x = total, y = category_pretty),
+    width = bar_width, fill = "grey80", color = "black"
+  ) +
+  scale_x_log10(
+    name   = "ATP molecules per generation",
+    breaks = primary_breaks,
+    labels = trans_format("log10", math_format(10^.x)),
+    expand = expansion(mult = c(0.08, 0.03)),
+    sec.axis = sec_axis(~ ., 
+                        breaks = pct_breaks, 
+                        labels = pct_labeller,
+                        name = "Costs relative to the cell budget (%)")
+  ) +
+  coord_cartesian(xlim = c(xmin * 0.8, xmax)) +
+  mytheme +
+  theme(
+    axis.title.x.top   = element_text(hjust = 0.5, size = 18),
+    axis.text.x.top    = element_text(size = 16),
+    axis.text.y        = element_text(margin = margin(r = 8)),
+    panel.grid.major.y = element_blank(),
+    panel.ontop        = FALSE
+  ) +
+  ylab(NULL) +
+  geom_segment(
+    data = seg_df %>% mutate(ymin = y - tick_half, ymax = y + tick_half),
+    aes(x = x, xend = x, y = ymin, yend = ymax),
+    inherit.aes = FALSE, linetype = "dotted", linewidth = 0.7
+  )
+
+ggsave("bioaccounting/figures/figure3_comparison_revised.pdf", f3, height = 6, width = 7)
+
+# Summary table for manuscript
+head_to_head_tbl <- bars_nice %>%
+  transmute(
+    category = as.character(category_pretty),
+    ATP      = total,
+    pct_of_budget = 100 * total / budget_ref
+  ) %>%
+  arrange(desc(ATP))
+
+print(head_to_head_tbl, n = Inf)
+
+cat(sprintf("\n=== Normalization summary ===\n"))
+cat(sprintf("Spore life cycle: %.1f h (%.1f veg gen-times) = 1 spore generation\n",
+            t_program, t_program/gen_time_h))
+cat(sprintf("All other traits: Normalized to per vegetative generation (%.2f h)\n", gen_time_h))
+cat(sprintf("  - Biofilm: %.0f h ÷ %.1f gen = per-gen cost\n", 12, 12/gen_time_h))
+cat(sprintf("  - Competence: %.0f h ÷ %.1f gen = per-gen cost\n", 3, 3/gen_time_h))
+cat(sprintf("  - Instantaneous traits: No adjustment\n\n"))

@@ -1,67 +1,67 @@
-﻿efficiency
-5
-95
-95
-1
-0
-35
-70
-35
-1
-95
-95
-95
-95
-50
-10
-0
-30
-55
-55
-55
-55
-35
-30
-30
-30
-30
-30
-30
-15
-15
-15
-90
-70
-40
-1
-0
-0.5
-0.5
-40.9
-25.6
-23.6
-16.7
-17
-45.2
-53.2
-46.4
-15.3
-10
-48.8
-47.9
-50.7
-48
-45.9
-58.8
-45.5
-15.1
-13.2
-74.2
-34
-23
-0.003
-0.014
-0.100
-0.0025
-0.007894737
-0.021276596
+publication,year,efficiency,culture_system,doi
+Kudo and Horikoshi,1979,5.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,1.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,0.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,35.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,70.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,35.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,1.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,95.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,50.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,10.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,0.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,55.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,55.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,55.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,55.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,35.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,30.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,15.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,15.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Kudo and Horikoshi,1979,15.0,"Batch (AMS medium, flask cultures)",10.1080/00021369.1979.10863868
+Widderich et al.,2015,90.0,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,70.0,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,40.0,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,1.0,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,0.0,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,0.5,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Widderich et al.,2015,0.5,"Batch DSM cultures (nutrient exhaustion, ±NaCl)",10.1111/mmi.13304
+Monteiro et al.,2008,40.9,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,25.6,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,23.6,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,16.7,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,17.0,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,45.2,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,53.2,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,46.4,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,15.3,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,10.0,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,48.8,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,47.9,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,50.7,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,48.0,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,45.9,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Monteiro et al.,2008,58.8,Batch / fed-batch bioreactor (DSM),10.1021/bp050062z
+Tavares et al.,2013,45.5,Batch broth/plates (DSM or F medium),10.1007/s00284-012-0269-2
+Tavares et al.,2013,15.1,Batch broth/plates (DSM or F medium),10.1007/s00284-012-0269-2
+Tavares et al.,2013,13.2,Batch broth/plates (DSM or F medium),10.1007/s00284-012-0269-2
+Tavares et al.,2013,74.2,Batch broth/plates (DSM or F medium),10.1007/s00284-012-0269-2
+Grossman and Losick,1988,34.0,"Batch (S7 medium, shaking flasks)",10.1073/pnas.85.12.4369
+Grossman and Losick,1988,23.0,"Batch (S7 medium, shaking flasks)",10.1073/pnas.85.12.4369
+Méndez et al.,2004,0.003,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
+Méndez et al.,2004,0.014,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
+Méndez et al.,2004,0.1,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
+Méndez et al.,2004,0.0025,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
+Méndez et al.,2004,0.007894737,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
+Méndez et al.,2004,0.021276596,"Batch (MM or Schaeffer, shaking flasks)",10.1128/JB.186.4.989-1000.2004
