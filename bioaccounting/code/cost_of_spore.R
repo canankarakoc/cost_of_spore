@@ -1,5 +1,5 @@
 # Spore Costs
-# 24 August 2025 - last update
+# 19 November 2025 - last update
 # Author: C. Karakoc
 # Reviewed: W. Shoemaker
 

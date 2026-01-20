@@ -1,6 +1,6 @@
 # Evolutionary bioenergetics of sporulation
 
-**Last updated:** 26 August 2025  
+**Last updated:** 19 November 2025  
 **Authors:** Canan Karakoç,  William R. Shoemaker, Jay T. Lennon
 
 This repository contains the complete analysis pipeline of the manuscript "Evolutionary bioenergetics of sporulation". 
